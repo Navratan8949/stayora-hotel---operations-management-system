@@ -1,0 +1,8 @@
+{
+  "name": "Stayora — Luxury Hotel & Operations Management System",
+  "description": "Complete boutique hotel booking website and property management system (PMS) with real-time room availability, front office, housekeeping, POS, billing, and analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
