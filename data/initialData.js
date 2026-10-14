@@ -936,6 +936,7 @@ export const INITIAL_PURCHASE_ORDERS = [
 ];
 
 export const INITIAL_STAFF = [
+  { id: "stf_super_admin", name: "Vikramaditya Singh Rathore", role: "Owner / Super Admin", department: "Executive Board", phone: "+91 98290 10000", shift: "Global 24/7 Authority", status: "On Duty" },
   { id: "stf_1", name: "Digvijay Singh Rathore", role: "General Manager", department: "Executive", phone: "+91 98290 11001", shift: "Morning / General", status: "On Duty" },
   { id: "stf_2", name: "Preeti Rawat", role: "Front Desk Supervisor", department: "Front Desk", phone: "+91 98290 11002", shift: "Morning (07:00 - 15:30)", status: "On Duty" },
   { id: "stf_3", name: "Ramesh Joshi", role: "Receptionist / Concierge", department: "Front Desk", phone: "+91 98290 11003", shift: "Evening (15:00 - 23:30)", status: "Scheduled" },

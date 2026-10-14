@@ -2,16 +2,28 @@
 
 export const STAYORA_DEMO_STAFF = [
   {
+    id: "stf_super_admin",
+    name: "Vikramaditya Singh Rathore",
+    email: "superadmin@stayora.com",
+    role: "Owner / Super Admin",
+    department: "Executive Board & Sovereignty",
+    avatar: "👑",
+    phone: "+91 98290 10000",
+    shift: "Global 24/7 Authority",
+    badgeColor: "bg-purple-100 text-purple-900 border-purple-300",
+    description: "Ultimate group sovereignty: multi-property audit, rate governance, user RBAC privileges, and enterprise reporting."
+  },
+  {
     id: "stf_1",
     name: "Digvijay Singh Rathore",
     email: "gm@stayora.com",
     role: "Hotel Manager",
     department: "Executive Management",
-    avatar: "👑",
+    avatar: "🏨",
     phone: "+91 98290 11001",
     shift: "General Management",
     badgeColor: "bg-amber-100 text-amber-900 border-amber-300",
-    description: "Full administrative, financial, rate management, and executive reporting control across all properties."
+    description: "Full operational oversight: room tariffs, reservation approvals, staff rosters, and day-to-day palace management."
   },
   {
     id: "stf_2",
