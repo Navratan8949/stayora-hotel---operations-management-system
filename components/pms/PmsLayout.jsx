@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useStayora } from "../../context/StayoraContext";
+import { STAYORA_ROLE_PERMISSIONS, canRoleAccessPath } from "../../lib/rbacPermissions";
 import {
   LayoutDashboard,
   CalendarDays,
@@ -32,7 +33,10 @@ import {
   X,
   CreditCard,
   Briefcase,
-  KeyRound
+  KeyRound,
+  Shield,
+  Lock,
+  Filter
 } from "lucide-react";
 
 export default function PmsLayout({ children }) {
@@ -150,6 +154,20 @@ export default function PmsLayout({ children }) {
       ]
     }
   ];
+
+  // Role-Based Access Control Filtering
+  const [rbacFilterMode, setRbacFilterMode] = useState("my_role"); // 'my_role' (enforced RBAC) or 'all'
+  const isCurrentRouteAllowed = canRoleAccessPath(currentRole, pathname);
+
+  const displayedNavGroups = useMemo(() => {
+    if (rbacFilterMode === "all") return navGroups;
+    return navGroups
+      .map((grp) => ({
+        ...grp,
+        items: grp.items.filter((item) => canRoleAccessPath(currentRole, item.href))
+      }))
+      .filter((grp) => grp.items.length > 0);
+  }, [navGroups, currentRole, rbacFilterMode]);
 
   return (
     <div className="min-h-screen bg-[#f5f1ea] text-stone-800 flex flex-col font-sans selection:bg-[#0d2b24]/20">
@@ -439,9 +457,45 @@ export default function PmsLayout({ children }) {
             </button>
           </div>
 
+          {/* RBAC Mode & Scope Pill */}
+          <div className="px-4 py-2.5 bg-[#071c17] border-b border-white/10 text-xs">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-stone-400 flex items-center gap-1">
+                <Shield className="w-3 h-3 text-[#c5a059]" /> Role Access
+              </span>
+              <span className="text-[10px] font-mono text-[#dfc285]">
+                {displayedNavGroups.reduce((acc, g) => acc + g.items.length, 0)} Pages
+              </span>
+            </div>
+            <div className="grid grid-cols-2 p-0.5 bg-black/40 rounded-lg text-[10px] font-bold">
+              <button
+                type="button"
+                onClick={() => setRbacFilterMode("my_role")}
+                className={`py-1 rounded-md transition-all cursor-pointer ${
+                  rbacFilterMode === "my_role"
+                    ? "bg-[#c5a059] text-[#0d2b24] shadow-xs"
+                    : "text-stone-400 hover:text-white"
+                }`}
+              >
+                Role View
+              </button>
+              <button
+                type="button"
+                onClick={() => setRbacFilterMode("all")}
+                className={`py-1 rounded-md transition-all cursor-pointer ${
+                  rbacFilterMode === "all"
+                    ? "bg-[#c5a059] text-[#0d2b24] shadow-xs"
+                    : "text-stone-400 hover:text-white"
+                }`}
+              >
+                All Pages
+              </button>
+            </div>
+          </div>
+
           {/* Navigation Links Scroll Container */}
           <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
-            {navGroups.map((grp, gIdx) => (
+            {displayedNavGroups.map((grp, gIdx) => (
               <div key={gIdx} className="space-y-1">
                 <span className="text-[10px] uppercase font-bold tracking-widest text-[#c5a059] block px-3 mb-1">
                   {grp.group}
@@ -536,7 +590,61 @@ export default function PmsLayout({ children }) {
               </Link>
             </div>
           )}
-          {children}
+
+          {/* Role Access Restricted Screen */}
+          {!isCurrentRouteAllowed && rbacFilterMode === "my_role" ? (
+            <div className="p-8 sm:p-12 bg-white rounded-3xl border border-stone-200 shadow-xl max-w-2xl mx-auto text-center space-y-5 my-8">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-100 border border-amber-300 text-amber-900 flex items-center justify-center shadow-md">
+                <Lock className="w-8 h-8 text-amber-800" />
+              </div>
+              <div>
+                <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-bold text-xs uppercase tracking-wider border border-amber-300">
+                  Access Restricted for Current Role
+                </span>
+                <h2 className="font-serif text-3xl font-bold text-[#0d2b24] mt-3">
+                  Role Permission Required
+                </h2>
+                <p className="text-sm text-stone-600 mt-2 max-w-md mx-auto leading-relaxed">
+                  Your active role <strong>"{currentRole}"</strong> is scoped to specific departments and cannot access this module.
+                </p>
+              </div>
+
+              <div className="p-4 bg-stone-50 rounded-2xl border border-stone-200/80 text-xs text-stone-700 max-w-md mx-auto text-left space-y-2">
+                <p className="font-bold text-stone-900 flex items-center gap-1.5">
+                  <Shield className="w-4 h-4 text-[#c5a059]" />
+                  Active Role Policy ({currentRole}):
+                </p>
+                <p className="text-stone-500">
+                  {STAYORA_ROLE_PERMISSIONS[currentRole]?.description || "Scoped to department tasks only."}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <Link
+                  href="/app"
+                  className="px-5 py-2.5 rounded-xl bg-[#0d2b24] hover:bg-[#15473c] text-[#dfc285] text-xs font-bold uppercase tracking-wider transition-all shadow-md"
+                >
+                  Return to My Dashboard
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => switchDemoUser("Owner / Super Admin")}
+                  className="px-5 py-2.5 rounded-xl bg-[#c5a059] hover:bg-[#dfc285] text-[#0d2b24] text-xs font-black uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                >
+                  Switch to Super Admin
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRbacFilterMode("all")}
+                  className="px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-semibold transition-all cursor-pointer"
+                >
+                  Preview All Pages (Sandbox)
+                </button>
+              </div>
+            </div>
+          ) : (
+            children
+          )}
         </main>
       </div>
     </div>
